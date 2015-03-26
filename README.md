@@ -13,3 +13,7 @@ on a Laravel Homestead box.
 ```127.0.0.1  phpmyadmin.app```
 
 4. Go to [http://phpmyadmin.app:8000](http://phpmyadmin.app:8000)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
