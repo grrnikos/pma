@@ -1,9 +1,9 @@
-### About
+## About
 
 Simple shell script that automatically installs the latest version of PhpMyAdmin
 on a Laravel Homestead box.
 
-### Usage
+## Usage
 
 1. SSH into your Homestead box and `cd` to your code/projects directory
 
