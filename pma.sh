@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo 'Downloading PhpMyAdmin 4.3.13'
-curl -#L http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.3.13/phpMyAdmin-4.3.13-english.tar.gz -o phpmyadmin.tar.gz
+echo 'Downloading PhpMyAdmin 4.4.0'
+curl -#L http://sourceforge.net/projects/phpmyadmin/files/phpMyAdmin/4.4.0/phpMyAdmin-4.4.0-english.tar.gz -o phpmyadmin.tar.gz
 
 mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
 
