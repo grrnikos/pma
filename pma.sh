@@ -7,4 +7,10 @@ mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
 
 rm phpmyadmin.tar.gz
 
-sudo bash /vagrant/scripts/serve.sh phpmyadmin.app $(pwd)/phpmyadmin
+CMD=/vagrant/scripts/serve-laravel.sh
+if [ ! -f $CMD ]; then
+    # fallback for older versions
+    CMD=/vagrant/scripts/serve.sh
+fi
+
+sudo bash $CMD phpmyadmin.app $(pwd)/phpmyadmin
