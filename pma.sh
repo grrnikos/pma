@@ -14,3 +14,5 @@ if [ ! -f $CMD ]; then
 fi
 
 sudo bash $CMD phpmyadmin.app $(pwd)/phpmyadmin
+
+sudo service nginx reload
