@@ -7,7 +7,7 @@ on a Laravel Homestead box.
 
 1. SSH into your Homestead box and `cd` to your code/projects directory
 
-2. `$ curl -sS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | sh`
+2. `$ curl -sS https://raw.githubusercontent.com/PetengDedet/pma/master/pma.sh | sh`
 
 3. Open the `/etc/hosts` file on your main machine and add
 ```127.0.0.1  phpmyadmin.app```
