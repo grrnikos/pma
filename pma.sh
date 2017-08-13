@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo 'Downloading phpMyAdmin 4.7.2'
-curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.2/phpMyAdmin-4.7.2-english.tar.gz -o phpmyadmin.tar.gz
+echo 'Downloading phpMyAdmin 4.7.3'
+curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.3/phpMyAdmin-4.7.3-english.tar.gz -o phpmyadmin.tar.gz
 
 mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
 
