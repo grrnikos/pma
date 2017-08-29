@@ -11,9 +11,10 @@ CMD=/vagrant/scripts/serve-laravel.sh
 CMD_CERT=/vagrant/scripts/create-certificate.sh
 
 if [ ! -f $CMD ]; then
-    # fallback for older versions
+    # Fallback for older Homestead versions
     CMD=/vagrant/scripts/serve.sh
 else
+    # Create an SSL certificate
     sudo bash $CMD_CERT phpmyadmin.app
 fi
 
