@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo 'Downloading phpMyAdmin 4.7.5'
-curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.5/phpMyAdmin-4.7.5-english.tar.gz -o phpmyadmin.tar.gz
+echo 'Downloading phpMyAdmin 4.7.6'
+curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.6/phpMyAdmin-4.7.6-english.tar.gz -o phpmyadmin.tar.gz
 
 mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
 
@@ -15,9 +15,9 @@ if [ ! -f $CMD ]; then
     CMD=/vagrant/scripts/serve.sh
 else
     # Create an SSL certificate
-    sudo bash $CMD_CERT phpmyadmin.app
+    sudo bash $CMD_CERT phpmyadmin.test
 fi
 
-sudo bash $CMD phpmyadmin.app $(pwd)/phpmyadmin
+sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin
 
 sudo service nginx reload
