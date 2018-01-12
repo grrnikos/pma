@@ -1,14 +1,18 @@
 #!/bin/bash
 
+code_dir=/home/vagrant/code
+
 if ! [ -f /home/vagrant/.phpmyadmin ]
 then
     echo 'Downloading phpMyAdmin 4.7.7'
     
-    curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.7/phpMyAdmin-4.7.7-english.tar.gz -o phpmyadmin.tar.gz
+    curl -#L https://files.phpmyadmin.net/phpMyAdmin/4.7.7/phpMyAdmin-4.7.7-english.tar.gz -o ${code_dir}/phpmyadmin.tar.gz
 
-    mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
+    mkdir ${code_dir}/phpmyadmin && tar xf ${code_dir}/phpmyadmin.tar.gz -C ${code_dir}/phpmyadmin --strip-components 1
 
-    rm phpmyadmin.tar.gz
+    rm ${code_dir}/phpmyadmin.tar.gz
+    
+    touch /home/vagrant/.phpmyadmin
 else    
     echo "phpMyAdmin installed!"
     
