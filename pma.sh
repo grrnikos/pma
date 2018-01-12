@@ -18,6 +18,6 @@ else
     sudo bash $CMD_CERT phpmyadmin.test
 fi
 
-sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin
+sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin  skipped_variables skipped_variable 7.2
 
 sudo service nginx reload
