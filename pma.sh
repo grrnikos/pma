@@ -24,6 +24,6 @@ fi
 sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin 80 443 7.3
 
 echo "Installing dependencies for phpMyAdmin"
-cd phpmyadmin && composer update --no-dev
+cd phpmyadmin && composer update --no-dev && yarn
 
 sudo service nginx reload
