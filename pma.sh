@@ -1,29 +1,32 @@
 #!/bin/bash
 
-LATEST_VERSION=$(curl -sS 'https://api.github.com/repos/phpmyadmin/phpmyadmin/releases/latest' | awk -F '"' '/tag_name/{print $4}')
-DOWNLOAD_URL="https://api.github.com/repos/phpmyadmin/phpmyadmin/tarball/$LATEST_VERSION"
+# From https://stackoverflow.com/a/59825964/5155484
+VERSION_INFO="$(curl -sS 'https://www.phpmyadmin.net/home_page/version.txt')"
+LATEST_VERSION="$(echo -e "$VERSION_INFO" | head -n 1)"
+LATEST_VERSION_URL="$(echo -e "$VERSION_INFO" | tail -n 1)"
+# We want the .tar.gz version
+LATEST_VERSION_URL="${LATEST_VERSION_URL/.zip/.tar.gz}"
 
-echo "Downloading phpMyAdmin $LATEST_VERSION"
-wget $DOWNLOAD_URL -q --show-progress -O 'phpmyadmin.tar.gz'
+echo "Downloading phpMyAdmin $LATEST_VERSION ($LATEST_VERSION_URL)"
+curl $LATEST_VERSION_URL -q -# -o 'phpmyadmin.tar.gz'
 
 mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
 
 rm phpmyadmin.tar.gz
 
-CMD=/vagrant/scripts/site-types/laravel.sh
-CMD_CERT=/vagrant/scripts/create-certificate.sh
+VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
+
+CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
+CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
 
 if [ ! -f $CMD ]; then
     # Fallback for older Homestead versions
-    CMD=/vagrant/scripts/serve.sh
+    CMD=${VAGRANT_SCRIPTS}serve.sh
 else
     # Create an SSL certificate
     sudo bash $CMD_CERT phpmyadmin.test
 fi
 
 sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin 80 443 7.3
-
-echo "Installing dependencies for phpMyAdmin"
-cd phpmyadmin && composer update --no-dev && yarn
 
 sudo service nginx reload
