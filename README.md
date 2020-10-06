@@ -9,7 +9,7 @@ on a Laravel Homestead box.
 
 2. `cd` to your code/projects directory (by default `~/Code`)
 
-3. `$ curl -sS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | sh`
+3. `$ curl -sS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
 
 4. Open the `/etc/hosts` file on your main machine and add `127.0.0.1  phpmyadmin.test`
 
