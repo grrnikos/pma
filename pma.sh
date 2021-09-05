@@ -27,6 +27,6 @@ else
     sudo bash $CMD_CERT phpmyadmin.test
 fi
 
-sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin 80 443 7.3
+sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin 80 443
 
 sudo service nginx reload
