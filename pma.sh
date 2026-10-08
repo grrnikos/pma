@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+DIR=phpmyadmin
+
 sha256() {
     if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d ' ' -f 1
 }
@@ -15,7 +17,8 @@ main() {
     LATEST_VERSION_URL="${LATEST_VERSION_URL/.zip/.tar.gz}"
 
     TMP="$(mktemp -d)"
-    trap 'rm -rf "$TMP"' EXIT
+    NEW=".$DIR.new" # next to $DIR, so the final swap is a quick rename
+    trap 'rm -rf "$TMP" "$NEW"' EXIT
 
     echo "Downloading phpMyAdmin $LATEST_VERSION ($LATEST_VERSION_URL)"
     curl -f -# "$LATEST_VERSION_URL" -o "$TMP/phpmyadmin.tar.gz"
@@ -27,8 +30,24 @@ main() {
         exit 1
     fi
 
-    mkdir phpmyadmin
-    tar xzf "$TMP/phpmyadmin.tar.gz" -C phpmyadmin --strip-components 1
+    rm -rf "$NEW"
+    mkdir "$NEW"
+    tar xzf "$TMP/phpmyadmin.tar.gz" -C "$NEW" --strip-components 1
+
+    # Keep the config of an earlier install; otherwise create one with its own cookie secret
+    if [ -f "$DIR/config.inc.php" ]; then
+        cp -p "$DIR/config.inc.php" "$NEW/"
+    else
+        cat > "$NEW/config.inc.php" <<EOF
+<?php
+\$cfg['blowfish_secret'] = sodium_hex2bin('$(openssl rand -hex 32)');
+\$cfg['Servers'][1]['host'] = 'localhost';
+\$cfg['PmaNoRelation_DisableWarning'] = true;
+EOF
+    fi
+
+    rm -rf "$DIR"
+    mv "$NEW" "$DIR"
 
     VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
 
@@ -43,9 +62,11 @@ main() {
         sudo bash "$CMD_CERT" phpmyadmin.test
     fi
 
-    sudo bash "$CMD" phpmyadmin.test "$(pwd)/phpmyadmin" 80 443
+    sudo bash "$CMD" phpmyadmin.test "$(pwd)/$DIR" 80 443
 
     sudo service nginx reload
+
+    echo "phpMyAdmin $LATEST_VERSION is ready in $(pwd)/$DIR"
 }
 
 main
