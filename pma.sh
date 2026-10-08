@@ -12,7 +12,7 @@ sha256() {
 
 # Everything runs from here, so a half-downloaded `curl | bash` does nothing
 main() {
-    if [ -d "$VAGRANT_SCRIPTS" ]; then
+    if [ -f "${VAGRANT_SCRIPTS}site-types/laravel.sh" ]; then # Homestead 9 (2019) and later
         MODE=homestead
         DB_HOST=localhost
         NO_PASSWORD=false
@@ -67,19 +67,8 @@ EOF
     mv "$NEW" "$DIR"
 
     if [ "$MODE" = homestead ]; then
-        CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
-        CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
-
-        if [ ! -f "$CMD" ]; then
-            # Fallback for older Homestead versions
-            CMD=${VAGRANT_SCRIPTS}serve.sh
-        else
-            # Create an SSL certificate
-            sudo bash "$CMD_CERT" phpmyadmin.test
-        fi
-
-        sudo bash "$CMD" phpmyadmin.test "$(pwd)/$DIR" 80 443
-
+        sudo bash "${VAGRANT_SCRIPTS}create-certificate.sh" phpmyadmin.test
+        sudo bash "${VAGRANT_SCRIPTS}site-types/laravel.sh" phpmyadmin.test "$(pwd)/$DIR" 80 443
         sudo service nginx reload
     fi
 
