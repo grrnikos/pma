@@ -1,7 +1,10 @@
 #!/bin/bash
+# Installs or updates phpMyAdmin in ./phpmyadmin and serves it at phpmyadmin.test,
+# from a Laravel Herd parked folder (macOS) or inside a Laravel Homestead box.
 set -euo pipefail
 
 DIR=phpmyadmin
+VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
 
 sha256() {
     if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d ' ' -f 1
@@ -9,6 +12,19 @@ sha256() {
 
 # Everything runs from here, so a half-downloaded `curl | bash` does nothing
 main() {
+    if [ -d "$VAGRANT_SCRIPTS" ]; then
+        MODE=homestead
+        DB_HOST=localhost
+        NO_PASSWORD=false
+    elif command -v herd >/dev/null; then
+        MODE=herd
+        DB_HOST=127.0.0.1 # Herd's PHP has no default MySQL socket, so use TCP
+        NO_PASSWORD=true  # root has none on DBngin and Herd Pro; Herd serves only this Mac
+    else
+        echo "Run this in a Herd parked folder, or inside a Homestead box." >&2
+        exit 1
+    fi
+
     # From https://stackoverflow.com/a/59825964/5155484
     VERSION_INFO="$(curl -fsS 'https://www.phpmyadmin.net/home_page/version.txt')"
     LATEST_VERSION="$(echo "$VERSION_INFO" | head -n 1)"
@@ -41,7 +57,8 @@ main() {
         cat > "$NEW/config.inc.php" <<EOF
 <?php
 \$cfg['blowfish_secret'] = sodium_hex2bin('$(openssl rand -hex 32)');
-\$cfg['Servers'][1]['host'] = 'localhost';
+\$cfg['Servers'][1]['host'] = '$DB_HOST';
+\$cfg['Servers'][1]['AllowNoPassword'] = $NO_PASSWORD;
 \$cfg['PmaNoRelation_DisableWarning'] = true;
 EOF
     fi
@@ -49,24 +66,27 @@ EOF
     rm -rf "$DIR"
     mv "$NEW" "$DIR"
 
-    VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
+    if [ "$MODE" = homestead ]; then
+        CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
+        CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
 
-    CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
-    CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
+        if [ ! -f "$CMD" ]; then
+            # Fallback for older Homestead versions
+            CMD=${VAGRANT_SCRIPTS}serve.sh
+        else
+            # Create an SSL certificate
+            sudo bash "$CMD_CERT" phpmyadmin.test
+        fi
 
-    if [ ! -f "$CMD" ]; then
-        # Fallback for older Homestead versions
-        CMD=${VAGRANT_SCRIPTS}serve.sh
-    else
-        # Create an SSL certificate
-        sudo bash "$CMD_CERT" phpmyadmin.test
+        sudo bash "$CMD" phpmyadmin.test "$(pwd)/$DIR" 80 443
+
+        sudo service nginx reload
     fi
 
-    sudo bash "$CMD" phpmyadmin.test "$(pwd)/$DIR" 80 443
-
-    sudo service nginx reload
-
     echo "phpMyAdmin $LATEST_VERSION is ready in $(pwd)/$DIR"
+    if [ "$MODE" = herd ]; then
+        echo "Open http://phpmyadmin.test (if this folder isn't parked in Herd, run 'herd link' inside $DIR)"
+    fi
 }
 
 main
