@@ -1,32 +1,51 @@
 #!/bin/bash
+set -euo pipefail
 
-# From https://stackoverflow.com/a/59825964/5155484
-VERSION_INFO="$(curl -sS 'https://www.phpmyadmin.net/home_page/version.txt')"
-LATEST_VERSION="$(echo -e "$VERSION_INFO" | head -n 1)"
-LATEST_VERSION_URL="$(echo -e "$VERSION_INFO" | tail -n 1)"
-# We want the .tar.gz version
-LATEST_VERSION_URL="${LATEST_VERSION_URL/.zip/.tar.gz}"
+sha256() {
+    if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d ' ' -f 1
+}
 
-echo "Downloading phpMyAdmin $LATEST_VERSION ($LATEST_VERSION_URL)"
-curl $LATEST_VERSION_URL -q -# -o 'phpmyadmin.tar.gz'
+# Everything runs from here, so a half-downloaded `curl | bash` does nothing
+main() {
+    # From https://stackoverflow.com/a/59825964/5155484
+    VERSION_INFO="$(curl -fsS 'https://www.phpmyadmin.net/home_page/version.txt')"
+    LATEST_VERSION="$(echo "$VERSION_INFO" | head -n 1)"
+    LATEST_VERSION_URL="$(echo "$VERSION_INFO" | tail -n 1)"
+    # We want the .tar.gz version
+    LATEST_VERSION_URL="${LATEST_VERSION_URL/.zip/.tar.gz}"
 
-mkdir phpmyadmin && tar xf phpmyadmin.tar.gz -C phpmyadmin --strip-components 1
+    TMP="$(mktemp -d)"
+    trap 'rm -rf "$TMP"' EXIT
 
-rm phpmyadmin.tar.gz
+    echo "Downloading phpMyAdmin $LATEST_VERSION ($LATEST_VERSION_URL)"
+    curl -f -# "$LATEST_VERSION_URL" -o "$TMP/phpmyadmin.tar.gz"
 
-VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
+    # phpMyAdmin publishes a checksum next to each download
+    EXPECTED="$(curl -fsS "$LATEST_VERSION_URL.sha256" | cut -d ' ' -f 1)"
+    if [ "$(sha256 "$TMP/phpmyadmin.tar.gz")" != "$EXPECTED" ]; then
+        echo "The download is damaged (checksum mismatch). Nothing was changed." >&2
+        exit 1
+    fi
 
-CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
-CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
+    mkdir phpmyadmin
+    tar xzf "$TMP/phpmyadmin.tar.gz" -C phpmyadmin --strip-components 1
 
-if [ ! -f $CMD ]; then
-    # Fallback for older Homestead versions
-    CMD=${VAGRANT_SCRIPTS}serve.sh
-else
-    # Create an SSL certificate
-    sudo bash $CMD_CERT phpmyadmin.test
-fi
+    VAGRANT_SCRIPTS=${VAGRANT_SCRIPTS:-/vagrant/scripts/}
 
-sudo bash $CMD phpmyadmin.test $(pwd)/phpmyadmin 80 443
+    CMD=${VAGRANT_SCRIPTS}site-types/laravel.sh
+    CMD_CERT=${VAGRANT_SCRIPTS}create-certificate.sh
 
-sudo service nginx reload
+    if [ ! -f "$CMD" ]; then
+        # Fallback for older Homestead versions
+        CMD=${VAGRANT_SCRIPTS}serve.sh
+    else
+        # Create an SSL certificate
+        sudo bash "$CMD_CERT" phpmyadmin.test
+    fi
+
+    sudo bash "$CMD" phpmyadmin.test "$(pwd)/phpmyadmin" 80 443
+
+    sudo service nginx reload
+}
+
+main
