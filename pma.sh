@@ -60,9 +60,10 @@ main() {
     if [ -f "$DIR/config.inc.php" ]; then
         cp -p "$DIR/config.inc.php" "$NEW/"
     else
+        SECRET="$(openssl rand -hex 32)"
         cat > "$NEW/config.inc.php" <<EOF
 <?php
-\$cfg['blowfish_secret'] = sodium_hex2bin('$(openssl rand -hex 32)');
+\$cfg['blowfish_secret'] = sodium_hex2bin('$SECRET');
 \$cfg['Servers'][1]['host'] = '$DB_HOST';
 \$cfg['Servers'][1]['AllowNoPassword'] = $NO_PASSWORD;
 \$cfg['PmaNoRelation_DisableWarning'] = true;
