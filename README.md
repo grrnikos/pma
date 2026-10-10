@@ -13,7 +13,7 @@ alone when a download fails, and updates phpMyAdmin when you run it again
 
 1. `cd` to a folder that Herd serves (a parked path, by default `~/Herd`)
 
-2. `curl -sS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
+2. `curl -fsS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
 
 3. Go to [http://phpmyadmin.test](http://phpmyadmin.test) and log in with your MySQL user, for example `root` with an empty password on [DBngin](https://dbngin.com) or Herd Pro.
    phpMyAdmin connects to `127.0.0.1`; change it in `phpmyadmin/config.inc.php` if needed
@@ -27,7 +27,7 @@ alone when a download fails, and updates phpMyAdmin when you run it again
 
 2. `cd` to your code/projects directory (by default `~/code`)
 
-3. `curl -sS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
+3. `curl -fsS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
 
 4. Open the `/etc/hosts` file on your main machine and add your box's IP, by default `192.168.56.56  phpmyadmin.test`
 
