@@ -16,7 +16,7 @@ alone when a download fails, and updates phpMyAdmin when you run it again
 2. `curl -fsS https://raw.githubusercontent.com/grrnikos/pma/master/pma.sh | bash`
 
 3. Go to [http://phpmyadmin.test](http://phpmyadmin.test) and log in with your MySQL user, for example `root` with an empty password on [DBngin](https://dbngin.com) or Herd Pro.
-   phpMyAdmin connects to `127.0.0.1`; change it in `phpmyadmin/config.inc.php` if needed
+   phpMyAdmin connects to `127.0.0.1` on port 3306; for another port, add `$cfg['Servers'][1]['port'] = '3307';` to `phpmyadmin/config.inc.php`
 
 ### Homestead
 
