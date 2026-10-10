@@ -25,6 +25,12 @@ main() {
         exit 1
     fi
 
+    # Replace ./phpmyadmin only if it's empty or an earlier phpMyAdmin (every release has a RELEASE-DATE-* file)
+    if [ -e "$DIR" ] && [ -n "$(ls -A "$DIR")" ] && ! ls "$DIR"/RELEASE-DATE-* >/dev/null 2>&1; then
+        echo "./$DIR exists and isn't phpMyAdmin. Move it away and run this again." >&2
+        exit 1
+    fi
+
     # From https://stackoverflow.com/a/59825964/5155484
     VERSION_INFO="$(curl -fsS 'https://www.phpmyadmin.net/home_page/version.txt')"
     LATEST_VERSION="$(echo "$VERSION_INFO" | head -n 1)"
